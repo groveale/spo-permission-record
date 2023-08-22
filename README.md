@@ -9,15 +9,15 @@ This includes both group connected and non group connected sites.
 
 This script use app only authentication. An app registration with the following permissions are required
 
-Graph Permissions
+### Graph Permissions
 * Sites.Read.All
 * GroupMember.Read.All
 * User.Read.All
 * Reports.Read.All
 
-# SPO Permissions
+### SPO Permissions
 * Sites.Read.All
-* Site.FullControll.All
+* Site.FullControl.All
 
 Both `Pnp.PowerShell` and MSGraph Powershell modules are used in the script
 
