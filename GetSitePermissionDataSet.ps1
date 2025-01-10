@@ -43,15 +43,20 @@ catch {
 # Variables
 ##############################################
 
-# Auth
-$clientId = "38acafba-2eb6-4510-848e-070b493ea4dc"
-$tenantId = "groverale.onmicrosoft.com"
-$thumbprint = "72A385EF67B35E1DFBACA89180B7B3C8F97453D7"
 
-$adminSiteUrl = "https://groverale-admin.sharepoint.com"
+
+$clientId = "6c0f4f31-bf65-4b74-8b1c-9c038ea5c102"
+$tenantId = "M365CPI77517573.onmicrosoft.com"
+$adminSiteUrl = "https://M365CPI77517573-admin.sharepoint.com"
+
+
+$thumbprint = "6ADC063641A24BB0BD68786AB71F07315CED9076"
+
+
+
 
 # Process all sites or only sites in the input file
-$allSites = $false
+$allSites = $true
 
 # List of Sites to check (ignore if $allSites = $true)
 $inputSitesCSV = "./SiteCollectionsList.txt"
@@ -70,8 +75,8 @@ $groupsToSkip = @(
 )
 
 # Config (Do we want to get visistors or members? Owner and Admins are always returned)
-$getMembers = $true
-$getVisitors = $true
+$getMembers = $false
+$getVisitors = $false
 
 enum MemberTypes {
     Owner
@@ -212,7 +217,7 @@ function GetSiteUsers([MemberTypes]$type, $graphObj, $pnpObj, $group)
     }
     catch {
         Write-Host "   Error getting site $type groups" -ForegroundColor Yellow
-        Write-Host "    Likey becasue Site has bespoke permissions" -ForegroundColor Yellow
+        Write-Host "    Likely because Site has bespoke permissions" -ForegroundColor Yellow
 
 
         return "ErrorGettingSPOGroups"
@@ -305,7 +310,14 @@ function GetSiteUsers([MemberTypes]$type, $graphObj, $pnpObj, $group)
 
             if ($domainObj.LoginName.Equals("c:0t.c|tenant|b71daa58-3cb3-4b97-a6e8-eae7f2a30f20") -or $domainObj.LoginName.Equals("c:0t.c|tenant|e8d578f9-c761-4097-b616-a1111909a468"))
             {
-                Write-Host "   Found: $($domainObj.Title) as an infered $type" -ForegroundColor Green
+                Write-Host "   Found: $($domainObj.Title) as an infered $type" -ForegroundColor DarkGreen
+                continue
+            }
+
+            ## We also need to ignore Global Administrator ownership
+            if ($domainObj.Title.Equals("Global Administrator"))
+            {
+                Write-Host "   Found: $($domainObj.Title) as an infered $type" -ForegroundColor DarkGreen
                 continue
             }
 
@@ -328,7 +340,16 @@ function GetSiteUsers([MemberTypes]$type, $graphObj, $pnpObj, $group)
 
             Write-Host "   Getting SecGroup Members" -ForegroundColor Gray
 
-            $members = Get-MgGroupMember -GroupId $groupId -Property "userPrincipalName,id,securityEnabled" -All
+            try 
+            {
+                $members = Get-MgGroupMember -GroupId $groupId -Property "userPrincipalName,id,securityEnabled" -All -ErrorAction Stop
+            }
+            catch {
+                Write-Host "    Error getting members for $($domainObj.Title)" -ForegroundColor Red
+                Write-Host "    $($Error[0].Exception.Message)" -ForegroundColor Red
+            }
+
+            
 
             foreach ($member in $members)
             {
@@ -493,7 +514,7 @@ function ProcessSite($site, $usage)
         }
     }
     catch {
-        Write-Host "Error getting owners for $($site.WebUrl)" -ForegroundColor Red
+        Write-Host "Error getting admins for $($site.WebUrl)" -ForegroundColor Red
         Write-LogEntry -siteUrl $site.WebUrl -siteName $siteName -lockStatus $lockStatus -sharingCapability $sharingCapability -domainList $domainList -user $null -siteUsage $usage -message "Error getting owners for $($site.WebUrl) - $($_.Exception.Message)"
     }
     
