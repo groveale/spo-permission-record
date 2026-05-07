@@ -6,10 +6,11 @@
 #              The first version will not look at broken inheritance.
 #              
 #
-# Todo :
-#           Bespoke permissions
-#           Broken inheritance (Sub sites, Libraries, Items?)
-#           Sharing links
+#   - PnP.PowerShell (3.1.0)
+#   - Microsoft.Graph.Authentication (1.28.0)
+#   - Microsoft.Graph.Sites (1.28.0)
+#   - Microsoft.Graph.Groups (1.28.0)
+#   - Microsoft.Graph.Reports (1.28.0)
 #
 # Alex Grover - alexgrover@microsoft.com
 #
@@ -19,9 +20,10 @@
 ##############################################
 ## Requires the following modules:
 try {
+    Import-Module PnP.PowerShell -ErrorAction Stop
     Import-Module Microsoft.Graph.Sites
     Import-Module Microsoft.Graph.Groups
-    Import-Module PnP.PowerShell
+    Import-Module Microsoft.Graph.Reports
 }
 catch {
     Write-Error "Error importing modules required modules - $($Error[0].Exception.Message))"
@@ -50,7 +52,7 @@ $tenantId = "M365CPI77517573.onmicrosoft.com"
 $adminSiteUrl = "https://M365CPI77517573-admin.sharepoint.com"
 
 
-$thumbprint = "6ADC063641A24BB0BD68786AB71F07315CED9076"
+$thumbprint = "967C8906385A2B494D07CD7858DA35622C9E2CF3"
 
 
 
